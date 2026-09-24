@@ -1,101 +1,58 @@
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0f766e">
-<title>SILELET Scanner</title>
-<script src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js"></script>
+<title>SILELET Scanner LIVE</title>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
-:root{--p:#0f766e;--p2:#14b8a6;--bg:#071413;--card:#10201e;--text:#eff8f6;--muted:#a9bfbb;--danger:#ff8177;--line:#29413d}
-*{box-sizing:border-box}html,body{margin:0;width:100%;min-height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}body{min-height:100dvh;overflow-x:hidden}.wrap{width:min(100%,620px);margin:0 auto;padding:12px 12px calc(20px + env(safe-area-inset-bottom))}.top{display:flex;align-items:center;gap:10px;padding:6px 2px 12px}.logo{width:42px;height:42px;border-radius:13px;background:var(--p);display:grid;place-items:center;font-weight:900;font-size:22px}.top b{font-size:18px}.top small{display:block;color:var(--muted)}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px;margin-bottom:12px;box-shadow:0 12px 35px rgba(0,0,0,.18)}.status{min-height:42px;padding:11px 12px;border-radius:14px;background:#17302c;color:#d9efeb;font-size:14px}.status.error{background:#3a1c1a;color:#ffd0cb}.reader{position:relative;width:100%;aspect-ratio:1/1;max-height:70dvh;min-height:260px;background:#000;border-radius:18px;overflow:hidden;margin-top:12px}.reader video{width:100%;height:100%;object-fit:cover;display:block}.frame{position:absolute;inset:17%;border:3px solid #fff;border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.28),0 0 24px rgba(20,184,166,.45);pointer-events:none}.line{position:absolute;left:19%;right:19%;height:3px;top:50%;background:#14b8a6;box-shadow:0 0 12px #14b8a6;animation:scan 1.8s linear infinite;pointer-events:none}@keyframes scan{0%{transform:translateY(-85px)}50%{transform:translateY(85px)}100%{transform:translateY(-85px)}}.placeholder{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:30px;color:var(--muted)}.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.btn{min-height:46px;border:0;border-radius:14px;padding:10px 12px;background:#203733;color:var(--text);font-weight:800}.btn.primary{background:var(--p);color:#fff}.btn.danger{background:#47211e;color:#ffd2cd}.btn:disabled{opacity:.45}.select{width:100%;margin-top:10px;min-height:46px;border-radius:14px;border:1px solid var(--line);background:#0c1a18;color:var(--text);padding:0 12px;font-size:16px}.result{font-size:14px;line-height:1.45;margin-top:12px;padding:12px;border-radius:14px;background:#0b1817;min-height:50px}.hint{color:var(--muted);font-size:12px;line-height:1.5;margin-top:10px}.hidden{display:none!important}@media(max-width:430px){.wrap{padding-left:8px;padding-right:8px}.card{border-radius:17px;padding:11px}.reader{min-height:230px}.frame{inset:14%}.controls{grid-template-columns:repeat(2,1fr)}.btn{min-height:48px;padding:9px 7px;font-size:14px}}
+:root{--p:#0f766e;--bg:#07110f;--card:#0d1d1a;--text:#fff;--muted:#b7c9c5;--ok:#39c7a9;--danger:#ff8d8d}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+body{display:flex;justify-content:center}.wrap{width:100%;max-width:620px;min-height:100dvh;padding:18px 14px 28px;display:flex;flex-direction:column;gap:12px}
+.head{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;border-radius:14px;background:var(--p);display:grid;place-items:center;font-size:24px;font-weight:800}.head h1{font-size:20px;margin:0}.head p{margin:2px 0 0;color:var(--muted);font-size:12px}
+.card{background:var(--card);border:1px solid #18322e;border-radius:22px;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+#reader{width:100%;min-height:360px;border-radius:18px;overflow:hidden;background:#000;display:grid;place-items:center}.placeholder{text-align:center;padding:30px;color:var(--muted)}.placeholder b{display:block;color:#fff;font-size:18px;margin-bottom:8px}.placeholder small{line-height:1.5}
+#reader video{width:100%!important;height:auto!important;max-height:70vh;object-fit:cover;border-radius:18px}#reader__scan_region{border:0!important}#reader__dashboard{display:none!important}#reader img{display:none!important}
+.status{min-height:44px;padding:11px 12px;border-radius:14px;background:#102722;color:#d8ece8;font-size:13px;line-height:1.4}.status.ok{background:#0d332c;color:#9ff0dc}.status.err{background:#3a1717;color:#ffc4c4}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{min-height:48px;border:0;border-radius:14px;font-weight:800;font-size:15px;padding:10px 14px;background:#e6efed;color:#18302d}.btn.primary{background:var(--p);color:#fff}.btn:disabled{opacity:.5}.note{font-size:12px;color:var(--muted);line-height:1.5}.hidden{display:none!important}
+@media(max-width:430px){.wrap{padding:12px 10px 22px}.card{padding:10px;border-radius:18px}#reader{min-height:320px}.actions{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="logo">S</div><div><b>SILELET Scanner</b><small>QR 2D • kamera depan / belakang</small></div></div>
+  <div class="head"><div class="logo">S</div><div><h1>Scanner LIVE SILELET</h1><p>QR 2D • Kamera belakang • scan otomatis</p></div></div>
   <div class="card">
-    <div id="status" class="status">Menyiapkan scanner…</div>
-    <div id="reader" class="reader"><div class="placeholder"><div><b>Kamera belum aktif</b><br><small>Izinkan akses kamera lalu arahkan QR ke kotak.</small></div></div><div class="frame"></div><div class="line"></div></div>
-    <select id="cameraSelect" class="select" aria-label="Pilih kamera"><option value="">Memuat kamera…</option></select>
-    <div class="controls">
-      <button id="backBtn" class="btn">🔙 Kamera Belakang</button>
-      <button id="frontBtn" class="btn">🤳 Kamera Depan</button>
-      <button id="nextBtn" class="btn">🔄 Kamera Berikutnya</button>
-      <button id="startBtn" class="btn primary">▶ Mulai Kamera</button>
-      <button id="stopBtn" class="btn danger">■ Stop</button>
-      <button id="photoBtn" class="btn">🖼️ Scan Foto</button>
-    </div>
-    <input id="photoInput" class="hidden" type="file" accept="image/*">
-    <div id="result" class="result">Belum ada QR yang dibaca.</div>
-    <div class="hint">Tips: gunakan kamera belakang untuk hasil paling cepat. Jika kamera belakang tidak tersedia, pilih kamera lain dari daftar. QR harus terlihat utuh dan cukup besar.</div>
+    <div id="reader"><div class="placeholder"><b>📷 Menyiapkan kamera...</b><small>Izinkan akses kamera jika browser meminta izin.</small></div></div>
   </div>
+  <div id="status" class="status">Menyiapkan scanner...</div>
+  <div class="actions">
+    <button id="start" class="btn primary">📷 Mulai Kamera</button>
+    <button id="stop" class="btn">Stop</button>
+  </div>
+  <div class="card note">Arahkan kamera belakang ke QR 2D siswa. QR akan dibaca otomatis tanpa mengambil foto. Setelah terbaca, hasil dikirim kembali ke SILELET.</div>
 </div>
 <script>
-(function(){
 'use strict';
-var reader=new ZXingBrowser.BrowserMultiFormatReader();
-var controls=null,cameras=[],currentIndex=-1,running=false,lastCode='',lastAt=0;
-var params=new URLSearchParams(location.search),nonce=params.get('nonce')||'';
+var qs=new URLSearchParams(location.search);
+var returnOrigin=qs.get('returnOrigin')||'';
+var nonce=qs.get('nonce')||'';
 var openerWindow=window.opener||null;
+var scanner=null,started=false,lastCode='',lastAt=0;
 function $(id){return document.getElementById(id)}
-function setStatus(msg,error){$('status').textContent=msg;$('status').classList.toggle('error',!!error)}
-function post(type,data){data=data||{};data.type=type;data.nonce=nonce;try{if(openerWindow&&!openerWindow.closed)openerWindow.postMessage(data,'*')}catch(e){}}
-function beep(ok){try{var C=window.AudioContext||window.webkitAudioContext;if(!C)return;var c=new C(),o=c.createOscillator(),g=c.createGain();o.frequency.value=ok?880:300;g.gain.value=.06;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+(ok?.09:.16));}catch(e){}try{if(navigator.vibrate)navigator.vibrate(ok?[55]:[80,60,80])}catch(e){}}
-function renderCameras(){var s=$('cameraSelect');s.innerHTML='';if(!cameras.length){var o=document.createElement('option');o.textContent='Tidak ada kamera';s.appendChild(o);return}cameras.forEach(function(c,i){var o=document.createElement('option');o.value=String(i);o.textContent=(c.label||('Kamera '+(i+1)));s.appendChild(o)});if(currentIndex>=0)s.value=String(currentIndex)}
-async function requestCamera(){
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw Error('Browser ini tidak mendukung akses kamera. Gunakan Chrome Android atau Safari iPhone terbaru.');
-  var stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
-  stream.getTracks().forEach(function(t){t.stop()});
-}
-async function listCameras(prefer){
-  await requestCamera();
-  var ds=await navigator.mediaDevices.enumerateDevices();
-  cameras=ds.filter(function(d){return d.kind==='videoinput'});
-  if(!cameras.length)throw Error('Kamera perangkat tidak ditemukan.');
-  var wanted=-1;
-  if(prefer==='front')wanted=cameras.findIndex(function(c){return /front|facetime|user|depan/i.test(c.label||'')});
-  if(prefer==='back')wanted=cameras.findIndex(function(c){return /back|rear|environment|belakang/i.test(c.label||'')});
-  if(wanted<0 && prefer==='front' && cameras.length>1)wanted=0;
-  if(wanted<0 && prefer==='back')wanted=cameras.length>1?cameras.length-1:0;
-  if(wanted<0)wanted=currentIndex>=0?currentIndex:0;
-  currentIndex=wanted;renderCameras();
-}
-function showCamera(){
-  if(running)try{reader.reset()}catch(e){}
-  running=false;controls=null;
-  var device=cameras[currentIndex];
-  if(!device)throw Error('Kamera belum dipilih.');
-  setStatus('Membuka '+(device.label||'kamera')+'…');
-  controls=reader.decodeFromVideoDevice(device.deviceId,'reader',function(result,err){
-    if(result){
-      var text=result.getText?result.getText():String(result.text||'');
-      var now=Date.now();
-      if(!text)return;
-      if(text===lastCode && now-lastAt<1800)return;
-      lastCode=text;lastAt=now;
-      $('result').innerHTML='<b>✓ QR terbaca</b><br>'+escapeHtml(text);
-      setStatus('QR terbaca. Menunggu hasil absensi…');beep(true);post('SILELET_QR_SCAN',{code:text});
-    }
-    if(err && !(err instanceof ZXingBrowser.NotFoundException)){
-      // transient decode errors are ignored; real camera errors are surfaced through promise/rejection.
-    }
-  });
-  running=true;setStatus('Kamera aktif. Arahkan QR 2D ke kotak.');post('SILELET_SCANNER_STATUS',{status:'Kamera aktif'});
-}
-function stopCamera(){try{reader.reset()}catch(e){}running=false;controls=null;setStatus('Kamera berhenti.');post('SILELET_SCANNER_STATUS',{status:'Scanner berhenti'})}
-async function start(prefer){try{if(running)stopCamera();await listCameras(prefer);showCamera()}catch(e){running=false;setStatus(e.message||String(e),true);post('SILELET_SCANNER_ERROR',{message:e.message||String(e)});}}
-function escapeHtml(v){return String(v||'').replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]})}
-async function scanPhoto(file){if(!file)return;setStatus('Membaca QR dari foto…');try{var url=URL.createObjectURL(file),img=new Image();await new Promise(function(res,rej){img.onload=res;img.onerror=rej;img.src=url});var r=await reader.decodeFromImageElement(img);URL.revokeObjectURL(url);var text=r&&r.getText?r.getText():String(r&&r.text||'');if(!text)throw Error('QR 2D tidak ditemukan pada foto.');$('result').innerHTML='<b>✓ QR dari foto</b><br>'+escapeHtml(text);beep(true);post('SILELET_QR_SCAN',{code:text,source:'photo'});setStatus('QR terbaca dari foto.');}catch(e){try{URL.revokeObjectURL(url)}catch(x){}beep(false);setStatus('QR 2D tidak terbaca dari foto.',true);$('result').textContent='Pilih foto yang menampilkan QR secara utuh dan jelas.';post('SILELET_SCANNER_ERROR',{message:'QR 2D pada foto tidak terbaca.'});}}
-$('backBtn').onclick=function(){start('back')};$('frontBtn').onclick=function(){start('front')};$('nextBtn').onclick=function(){if(!cameras.length)return start();currentIndex=(currentIndex+1)%cameras.length;renderCameras();start()};$('startBtn').onclick=function(){start(currentIndex<0?'back':null)};$('stopBtn').onclick=stopCamera;$('photoBtn').onclick=function(){$('photoInput').value='';$('photoInput').click()};$('photoInput').onchange=function(e){scanPhoto(e.target.files&&e.target.files[0])};$('cameraSelect').onchange=function(){currentIndex=Number($('cameraSelect').value);start()};
-window.addEventListener('message',function(ev){var d=ev.data||{};if(d.type==='SILELET_STOP_SCANNER'&&(!nonce||d.nonce===nonce))stopCamera();if(d.type==='SILELET_SCAN_RESULT'&&(!nonce||d.nonce===nonce)){setStatus(d.ok?'Absensi berhasil. Siap scan berikutnya.':'Absensi ditolak/gagal: '+(d.message||''),!d.ok);$('result').innerHTML=d.ok?'<b>✓ '+escapeHtml(d.name||'Siswa')+'</b><br>'+escapeHtml(d.message||'Absensi berhasil.'):'<b>✕ Gagal</b><br>'+escapeHtml(d.message||'Absensi gagal.');if(!d.ok)beep(false)}});
-window.addEventListener('beforeunload',function(){stopCamera()});
-(async function(){
-  if(!window.opener){setStatus('Scanner dibuka tanpa halaman SILELET. Anda tetap dapat menguji kamera.',false)}
-  try{await start('back')}catch(e){setStatus(e.message||String(e),true)}
-})();
-})();
+function setStatus(msg,type){var e=$('status');e.textContent=msg;e.className='status'+(type?' '+type:'')}
+function validOrigin(){try{return new URL(returnOrigin).origin===returnOrigin}catch(e){return false}}
+function send(type,data){if(!openerWindow||openerWindow.closed){setStatus('Jendela SILELET utama tidak ditemukan. Tutup scanner lalu buka dari tombol SCAN QR LIVE di SILELET.','err');return false}if(!validOrigin()){setStatus('Koneksi scanner tidak valid. Buka scanner dari SILELET.','err');return false}try{openerWindow.postMessage(Object.assign({type:type,nonce:nonce},data||{}),returnOrigin);return true}catch(e){setStatus('Gagal mengirim hasil ke SILELET.','err');return false}}
+function onScanSuccess(decodedText){var code=String(decodedText||'').replace(/[\r\n\t]/g,'').trim();if(!code)return;var now=Date.now();if(code===lastCode&&now-lastAt<1800)return;lastCode=code;lastAt=now;setStatus('✓ QR terbaca: '+code+' — mengirim ke SILELET...','ok');send('SILELET_QR_SCAN',{code:code});}
+function onScanFailure(){ }
+async function startCamera(){if(started)return;if(typeof Html5Qrcode==='undefined'){setStatus('Library QR scanner gagal dimuat. Periksa koneksi internet.','err');return}started=true;$('start').disabled=true;setStatus('Meminta izin kamera...');try{scanner=new Html5Qrcode('reader');await scanner.start({facingMode:{exact:'environment'}},{fps:12,qrbox:function(viewfinderWidth,viewfinderHeight){var size=Math.floor(Math.min(viewfinderWidth,viewfinderHeight)*.72);size=Math.max(180,Math.min(size,360));return {width:size,height:size}},aspectRatio:1},onScanSuccess,onScanFailure);setStatus('📷 Kamera belakang aktif. Arahkan QR 2D ke kotak.','ok')}catch(e){try{if(scanner){await scanner.clear()}}catch(x){}scanner=null;started=false;$('start').disabled=false;setStatus('Kamera gagal dibuka: '+(e&&e.message||String(e))+' Pastikan izin kamera diizinkan.','err')}}
+async function stopCamera(){try{if(scanner){await scanner.stop();await scanner.clear()}}catch(e){}scanner=null;started=false;$('start').disabled=false;$('reader').innerHTML='<div class="placeholder"><b>📷 Kamera berhenti</b><small>Tekan Mulai Kamera untuk menjalankan kembali.</small></div>';setStatus('Scanner berhenti.','')}
+$('start').addEventListener('click',startCamera);$('stop').addEventListener('click',stopCamera);
+window.addEventListener('message',function(ev){var d=ev.data||{};if(ev.origin!==location.origin&&d.type==='SILELET_STOP_SCANNER'&&d.nonce===nonce){stopCamera()};if(d.type==='SILELET_SCAN_RESULT'&&d.nonce===nonce){if(d.ok)setStatus('✓ '+(d.name||'Siswa')+' — '+(d.message||'Absensi berhasil'),'ok');else setStatus('Gagal: '+(d.message||'Absensi gagal'),'err')}});
+window.addEventListener('beforeunload',function(){try{if(scanner)scanner.stop()}catch(e){}});
+window.addEventListener('load',function(){if(!openerWindow){setStatus('Scanner harus dibuka dari tombol SCAN QR LIVE di SILELET.','err');return}startCamera()});
 </script>
 </body>
 </html>
+

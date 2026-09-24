@@ -24,7 +24,7 @@ button{background:#14b8a6;color:#fff;font-weight:700}.secondary{background:#164a
 <div class="grid">
 <button id="start">▶ Mulai Kamera</button><button id="flip" class="secondary">🔄 Depan / Belakang</button>
 <select id="camera" class="wide"><option value="">Pilih kamera</option></select>
-<button id="stop" class="danger">⏹ Stop</button><button id="photo" class="secondary">📸 Scan Foto</button>
+<button id="stop" class="danger">⏹ Stop</button><button id="photo" class="secondary">📸 Scan Foto</button><button id="soundTest" class="wide secondary">🔊 TES SUARA ABSENSI</button>
 <input id="file" class="hide" type="file" accept="image/*" capture="environment">
 </div>
 <div id="status" class="status">Siap. Tekan Mulai Kamera.</div><div id="result" class="result">Belum ada QR terbaca.</div>
@@ -195,6 +195,7 @@ async function flipCamera(){
  try{await startCamera()}catch(e){say('✕ '+friendly(e));post('SILELET_SCANNER_ERROR',{message:friendly(e)})}
 }
 $('start').onclick=async()=>{try{await startCamera()}catch(e){say('✕ '+friendly(e));post('SILELET_SCANNER_ERROR',{message:friendly(e)})}};
+$('soundTest').onclick=async()=>{await primeAudio();announceAttendance(true);say('Tes suara: Absensi berhasil. Jika tidak terdengar, naikkan volume media dan nonaktifkan mode senyap.');};
 $('flip').onclick=flipCamera;
 $('stop').onclick=()=>{stop();say('Kamera dihentikan.');post('SILELET_SCANNER_STATUS',{status:'Kamera dihentikan'})};
 camera.onchange=async()=>{if(camera.value){try{await startCamera()}catch(e){say('✕ '+friendly(e))}}};
@@ -219,12 +220,15 @@ addEventListener('message',e=>{
  if(d.type==='SILELET_STOP_SCANNER'){stop();say('Scanner dihentikan oleh SILELET.')}
  if(d.type==='SILELET_SCAN_RESULT'){
    delivering=false;
-   if(d.ok){
+   const isSuccess = d.ok === true || d.success === true ||
+     String(d.status || d.result || '').toLowerCase() === 'success' ||
+     String(d.status || d.result || '').toLowerCase() === 'berhasil';
+   if(isSuccess){
      say('✓ SILELET mengonfirmasi absensi berhasil.');
-     result.textContent='TERSIMPAN: '+(d.name||'Absensi siswa berhasil disimpan.');
+     result.textContent='TERSIMPAN: '+(d.name||d.message||'Absensi siswa berhasil disimpan.');
      announceAttendance(true);
    } else {
-     const msg = d.message || 'Absensi gagal';
+     const msg = d.message || d.error || 'Absensi gagal atau siswa ditolak';
      say('✕ SILELET menolak atau gagal menyimpan absensi.');
      result.textContent='GAGAL: '+msg;
      announceAttendance(false, msg);

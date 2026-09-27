@@ -7,97 +7,27 @@
 <meta name="theme-color" content="#0f766e">
 <title>SILELET QR Scanner</title>
 <style>
-*{box-sizing:border-box}
-:root{
-  --bg:#f4f7f8;--card:#fff;--text:#17323a;--muted:#6c7d83;
-  --primary:#0f766e;--primary2:#0b5f59;--line:#dfe8ea;
-  --danger:#b42318;--soft:#edf7f5;--shadow:0 8px 28px rgba(18,55,61,.08)
-}
-html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text)}
-body{padding:0}
-.app{width:100%;max-width:620px;min-height:100vh;margin:auto;background:var(--bg)}
-header{
-  position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);
-  backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
-  padding:12px 16px;display:flex;align-items:center;gap:11px
-}
-.logo{width:40px;height:40px;border-radius:12px;background:var(--primary);display:grid;place-items:center;font-size:21px;box-shadow:0 4px 12px rgba(15,118,110,.2)}
-h1{font-size:16px;line-height:1.15;margin:0;font-weight:800}
-.sub{font-size:11px;color:var(--muted);margin-top:3px}
-main{padding:12px}
-.stage{
-  position:relative;background:#071a18;border-radius:18px;overflow:hidden;
-  aspect-ratio:4/3;min-height:250px;max-height:62vh;
-  box-shadow:var(--shadow);border:1px solid #d9e5e6
-}
-video{width:100%;height:100%;object-fit:cover;display:block}
-.frame{
-  position:absolute;left:18%;right:18%;top:17%;bottom:17%;
-  border:2px solid rgba(255,255,255,.95);border-radius:18px;
-  box-shadow:0 0 0 9999px rgba(0,0,0,.30);pointer-events:none
-}
-.frame:after{
-  content:"";position:absolute;left:10%;right:10%;top:50%;height:2px;
-  background:rgba(20,184,166,.9);box-shadow:0 0 10px rgba(20,184,166,.8)
-}
-.hint{
-  position:absolute;left:50%;bottom:12px;transform:translateX(-50%);
-  background:rgba(0,0,0,.58);color:#fff;border-radius:999px;
-  padding:6px 10px;font-size:11px;white-space:nowrap
-}
-.controls{margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-button,select{
-  width:100%;height:42px;border:1px solid var(--line);border-radius:10px;
-  padding:8px 10px;font-size:13px;font-family:inherit;outline:none
-}
-button{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:750;cursor:pointer}
-button:active{transform:scale(.985)}
-.secondary{background:#fff;color:var(--text)}
-.danger{background:#fff;color:var(--danger);border-color:#efc8c4}
-.wide{grid-column:1/-1}
-select{background:#fff;color:var(--text)}
-.status,.result{
-  margin-top:8px;border:1px solid var(--line);border-radius:11px;
-  padding:9px 11px;background:var(--card);font-size:12px;line-height:1.4;
-  box-shadow:0 2px 8px rgba(18,55,61,.04);word-break:break-word
-}
-.result{background:var(--soft);font-weight:700;color:#0b5f59}
-.hide{display:none}
-.filter-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 10px;margin-top:9px;box-shadow:0 2px 8px rgba(18,55,61,.04)}.filter-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.filter-note{font-size:10px;color:var(--muted);margin-top:5px}.section-title{font-size:11px;font-weight:800;color:var(--muted);margin:13px 2px 6px;text-transform:uppercase;letter-spacing:.05em}
-.badge{
-  display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;
-  background:#eef4f5;color:#53666b;font-size:10px;font-weight:700
-}
-@media(max-width:420px){
-  main{padding:9px}.stage{border-radius:15px;min-height:235px}
-  header{padding:10px 12px}.logo{width:36px;height:36px}
-  button,select{height:40px;font-size:12px}
-}
+*{box-sizing:border-box}body{margin:0;background:#071f1d;color:#fff;font-family:system-ui,Arial}.app{max-width:760px;min-height:100vh;margin:auto;background:#0b2926}
+header{background:#0f766e;padding:16px}h1{font-size:20px;margin:0}.sub{font-size:12px;margin-top:4px}
+main{padding:12px}.stage{position:relative;background:#000;border-radius:16px;overflow:hidden;aspect-ratio:3/4;max-height:70vh;min-height:300px}
+video{width:100%;height:100%;object-fit:cover}.frame{position:absolute;inset:22% 14%;border:3px solid #fff;border-radius:20px;box-shadow:0 0 0 9999px #0004;pointer-events:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+button,select{width:100%;min-height:48px;border:0;border-radius:11px;padding:10px;font-size:15px}
+button{background:#14b8a6;color:#fff;font-weight:700}.secondary{background:#164a45}.danger{background:#a82720}.wide{grid-column:1/-1}select{background:white;color:#111}
+.status,.result{padding:12px;margin-top:10px;border-radius:11px;background:#103b36;font-size:13px;word-break:break-word}.result{background:#061714;font-weight:700}.hide{display:none}
 </style>
 </head>
 <body><div class="app">
-<header>
-      <div class="logo">📷</div>
-      <div><h1>SILELET QR Scanner</h1><div class="sub">Scan absensi dengan cepat • QR 2D • Android & iPhone</div></div>
-    </header>
+<header><h1>📷 SILELET QR Scanner</h1><div class="sub">QR 2D • Kamera depan/belakang • Android & iPhone</div></header>
 <main>
-<div class="filter-card">
-  <div class="filter-label">Filter Kelas</div>
-  <select id="classFilter">
-    <option value="">Semua Kelas</option>
-  </select>
-  <div class="filter-note">Jika kelas dipilih, QR siswa dari kelas lain akan ditolak.</div>
-</div>
 <div class="stage"><video id="video" autoplay muted playsinline></video><div class="frame"></div></div>
 <div class="grid">
 <button id="start">▶ Mulai Kamera</button><button id="flip" class="secondary">🔄 Depan / Belakang</button>
 <select id="camera" class="wide"><option value="">Pilih kamera</option></select>
-<button id="stop" class="danger">⏹ Hentikan</button><button id="photo" class="secondary">📸 Dari Foto</button><button id="soundTest" class="wide secondary">🔊 Tes Suara</button>
+<button id="stop" class="danger">⏹ Stop</button><button id="photo" class="secondary">📸 Scan Foto</button><button id="soundTest" class="wide secondary">🔊 TES SUARA ABSENSI</button>
 <input id="file" class="hide" type="file" accept="image/*" capture="environment">
 </div>
-<div class="section-title">Status</div>
- <div id="status" class="status">Siap. Tekan Mulai Kamera.</div>
- <div id="result" class="result">Belum ada QR terbaca.</div>
+<div id="status" class="status">Siap. Tekan Mulai Kamera.</div><div id="result" class="result">Belum ada QR terbaca.</div>
 </main></div>
 <script src="https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js"></script>
 <script>
@@ -105,24 +35,10 @@ select{background:#fff;color:var(--text)}
 const $=id=>document.getElementById(id),video=$('video'),status=$('status'),result=$('result'),camera=$('camera');
 const params=new URLSearchParams(location.search),returnOrigin=params.get('returnOrigin')||'',nonce=params.get('nonce')||'';
 let controls=null,reader=null,devices=[],facing='environment',running=false,delivering=false,lastCode='',lastTime=0;
-const classFilter=document.getElementById('classFilter'); let selectedClassId='';
 
 function post(type,data={}) {
   if(!window.opener||window.opener.closed||!returnOrigin){return false}
-  try{
-    const payload={type,nonce:String(nonce||'').slice(0,80)};
-    if(type==='SILELET_QR_SCAN'){
-      payload.code=String(data.code||'').slice(0,256);
-      payload.scanId=String(data.scanId||'').slice(0,100);
-      payload.classId=String(data.classId||'').slice(0,100);
-    }else{
-      for(const k of ['status','facing','message']){
-        if(data[k]!=null) payload[k]=String(data[k]).slice(0,300);
-      }
-    }
-    window.opener.postMessage(payload,returnOrigin);
-    return true;
-  }catch(e){return false}
+  try{window.opener.postMessage({...data,type,nonce},returnOrigin);return true}catch(e){return false}
 }
 function say(s){status.textContent=s}
 function stop(){
@@ -256,82 +172,22 @@ function announceAttendance(success, message){
   }
 }
 
-function normalizeScanCode(raw){
-  let s=String(raw??'').trim();
-  if(!s) return '';
-
-  const pick=(v)=>{
-    if(v==null) return '';
-    if(typeof v==='string'){
-      const x=v.trim();
-      if(!x) return '';
-      if(x.length<=256 && !/^[{\[]/.test(x)) return x;
-      try{return pick(JSON.parse(x))}catch(e){}
-      try{
-        const u=new URL(x);
-        for(const k of ['code','qr_token','qr','token','id_siswa','nisn','nis']){
-          const q=u.searchParams.get(k);
-          if(q) return String(q).trim();
-        }
-      }catch(e){}
-      return '';
-    }
-    if(Array.isArray(v)){
-      for(const item of v){const r=pick(item);if(r)return r}
-      return '';
-    }
-    if(typeof v==='object'){
-      for(const k of ['code','qr_token','qr','token','id_siswa','nisn','nis','id']){
-        if(v[k]!=null){const r=pick(v[k]);if(r)return r}
-      }
-      return '';
-    }
-    return String(v).trim();
-  };
-
-  const out=pick(s);
-  return out&&out.length<=256?out:'';
-}
-
 function deliver(code){
-  const normalized=normalizeScanCode(code);
-  if(!normalized){
-    say('QR ditolak: data QR terlalu besar/tidak valid.');
-    result.textContent='QR tidak berisi kode siswa yang valid.';
-    delivering=false;
-    return;
-  }
-
-  const now=Date.now();
-  const codeSafe=normalized.slice(0,256);
-  if((codeSafe===lastCode&&now-lastTime<2500)||delivering)return;
-
-  lastCode=codeSafe;
-  lastTime=now;
-  delivering=true;
-  result.textContent='QR: '+codeSafe;
-  say('QR terbaca. Mengirim kode siswa…');
-
-  const safeScanId=String(nonce||'scan').slice(0,80)+':'+now;
-  const sent=post('SILELET_QR_SCAN',{code:codeSafe,scanId:safeScanId,classId:selectedClassId});
-
-  if(!sent){
-    say('QR terbaca, tetapi SILELET tidak terhubung. Buka scanner dari tombol scanner di SILELET.');
-    result.textContent='GAGAL TERHUBUNG: scanner tidak memiliki jendela induk SILELET.';
-    delivering=false;
-    return;
-  }
-
-  try{navigator.vibrate?.(80)}catch(e){}
-  setTimeout(()=>{
-    if(delivering){
-      say('Belum ada konfirmasi dari SILELET. Periksa koneksi/halaman SILELET.');
-      result.textContent='QR terkirim ke halaman SILELET, menunggu konfirmasi database.';
-      delivering=false;
-    }
-  },12000);
+ const now=Date.now();code=String(code||'').trim();
+ if(!code||(code===lastCode&&now-lastTime<2500)||delivering)return;
+ lastCode=code;lastTime=now;delivering=true;
+ result.textContent='QR: '+code;
+ say('QR terbaca. Mengirim ke SILELET…');
+ const sent=post('SILELET_QR_SCAN',{code,scanId:(nonce||'scan')+':'+now});
+ if(!sent){
+   say('QR terbaca, tetapi SILELET tidak terhubung. Buka scanner dari tombol scanner di SILELET.');
+   result.textContent='GAGAL TERHUBUNG: scanner tidak memiliki jendela induk SILELET.';
+   delivering=false;return;
+ }
+ try{navigator.vibrate?.(80)}catch(e){}
+ // Do not claim saved until the parent SILELET returns SILELET_SCAN_RESULT.
+ setTimeout(()=>{if(delivering){say('Belum ada konfirmasi dari SILELET. Periksa koneksi/halaman SILELET.');result.textContent='QR terkirim ke halaman SILELET, menunggu konfirmasi database.';delivering=false}},12000);
 }
-
 async function flipCamera(){
  facing=facing==='environment'?'user':'environment';
  // Clear manual device selection so facingMode is honored.
@@ -358,28 +214,6 @@ $('file').onchange=async e=>{
    img.onerror=()=>{URL.revokeObjectURL(url);say('Foto tidak dapat dibaca.')};img.src=url;
  }catch(err){say(err.message||'Gagal membaca foto.')}finally{e.target.value=''}
 };
-function renderClassOptions(list){
-  if(!classFilter)return;
-  const keep=selectedClassId;
-  classFilter.innerHTML='<option value="">Semua Kelas</option>';
-  (Array.isArray(list)?list:[]).forEach(c=>{
-    const id=String(c.id_kelas||c.id||c.classId||'').trim();
-    const name=String(c.nama_kelas||c.nama||c.name||id).trim();
-    if(!id)return;
-    const o=document.createElement('option'); o.value=id; o.textContent=name;
-    classFilter.appendChild(o);
-  });
-  if(keep)classFilter.value=keep;
-}
-function requestClassList(){post('SILELET_REQUEST_CLASS_LIST',{});}
-if(classFilter)classFilter.onchange=()=>{
-  selectedClassId=String(classFilter.value||'');
-  lastCode='';lastTime=0;delivering=false;
-  say(selectedClassId?'Filter kelas aktif.':'Semua kelas diterima.');
-  result.textContent=selectedClassId?'Scan dibatasi ke '+(classFilter.selectedOptions[0]?.textContent||selectedClassId):'Filter kelas: Semua';
-  post('SILELET_CLASS_FILTER_CHANGED',{classId:selectedClassId});
-};
-
 addEventListener('message',e=>{
  if(returnOrigin&&e.origin!==returnOrigin)return;
  const d=e.data||{};if(nonce&&d.nonce!==nonce)return;
@@ -401,7 +235,7 @@ addEventListener('message',e=>{
    }
  }
 });
-addEventListener('load',async()=>{await enumerate();requestClassList();say('Siap. Pilih kelas untuk memfilter QR.')});
+addEventListener('load',async()=>{await enumerate();say('Siap. Tekan Mulai Kamera.')});
 addEventListener('pagehide',stop);
 })();
 </script></body></html>

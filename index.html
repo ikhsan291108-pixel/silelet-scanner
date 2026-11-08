@@ -776,7 +776,7 @@ body.dark .hero h2,body.dark .item h4,body.dark .card h3{color:#e7efff!important
   <div class="pills hidden"><button class="active" data-att="SEKOLAH">Sekolah</button><button data-att="BELAJAR">Belajar</button><button data-att="SHOLAT">Sholat</button><button data-att="EKSTRA">Ekstrakurikuler</button></div>
   <div class="card mode-card"><div id="attendanceTitle"><b>Absensi Sekolah</b><small>Kehadiran masuk sekolah</small></div><label class="class-only hidden">Kelas<select id="attendanceClass"></select></label><label class="activity-only hidden">Kegiatan<select id="activitySelect"></select></label><label class="extra-only hidden">Ekstrakurikuler<select id="extraSelect"></select></label></div>
   <div class="grid2">
-    <div class="card scanner-card"><h3>📷 Scan Kamera</h3><p class="muted smalltext">QR 2D LIVE • Kamera belakang aktif otomatis • scan tanpa foto.</p><div id="reader" class="reader"><div><b>Kamera belum aktif</b><small>Tekan SCAN QR LIVE</small></div></div><div class="actions"><button id="startScan" class="btn primary">📷 SCAN QR LIVE</button><button id="stopScan" class="btn">Stop</button></div><input id="cameraFile" type="file" accept="image/*" capture="environment" class="hidden"><button id="photoScan" class="btn full">🖼️ Scan dari Foto</button><div id="scanResult" class="result">Belum ada hasil.</div></div>
+    <div class="card scanner-card"><h3>📷 Scan Kamera</h3><p class="muted smalltext">QR LIVE • kamera belakang/depan • suara saat berhasil atau gagal.</p><div id="reader" class="reader"><div><b>Kamera belum aktif</b><small>Tekan SCAN QR LIVE</small></div></div><div class="actions"><button id="startScan" class="btn primary">📷 SCAN QR LIVE</button><button id="stopScan" class="btn">Stop</button><button id="switchCam" type="button" class="btn" style="grid-column:1/-1">🔄 Kamera Depan / Belakang</button></div><input id="cameraFile" type="file" accept="image/*" capture="environment" class="hidden"><button id="photoScan" class="btn full">🖼️ Scan dari Foto</button><div id="scanResult" class="result">Belum ada hasil.</div></div>
     <div class="card class-roster hidden"><div class="cardhead"><h3>Daftar Siswa Kelas</h3><button id="saveClassAttendance" class="btn primary">Simpan Absen Kelas</button></div><div class="attendance-card-toolbar"><input id="classRosterSearch" placeholder="Cari nama siswa..." oninput="filterAttendanceCards(this.value)" style="max-width:320px"><button type="button" class="btn" onclick="setAllAttendanceStatus('HADIR')">✓ Hadir Semua</button></div><div id="classRoster"></div></div><div class="card"><h3>Absensi Manual / Kode</h3><div id="manualStudentPicker"></div><label>Status<select id="manualStatus"><option>HADIR</option><option>TERLAMBAT</option><option>IZIN</option><option>SAKIT</option><option>ALPA</option></select></label><button id="saveAttendance" class="btn primary full">Simpan Absensi</button><hr><label>Kode QR / Barcode<input id="barcode" inputmode="text" autocomplete="off" placeholder="Scan dengan scanner USB / ketik kode"></label><button id="submitBarcode" class="btn full">Absen dengan Kode</button></div>
   </div>
 </section>
@@ -864,7 +864,18 @@ function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()
 function toast(m){var e=$('toast');e.textContent=m;e.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(function(){e.classList.remove('show')},3200)}
 function busy(on,text){$('loading').classList.toggle('hidden',!on);if(text)$('loadingText').textContent=text}
 function fatal(m){busy(false);$('fatal').innerHTML='<h2>SILELET tidak dapat dimuat</h2><p>'+esc(m)+'</p>';$('fatal').classList.remove('hidden')}
-function server(action,p,timeout){p=p||{};timeout=timeout||20000;return new Promise(function(resolve,reject){if(!window.google||!google.script||!google.script.run){reject(Error('Buka aplikasi melalui URL Web App /exec.'));return}var done=false,t=setTimeout(function(){if(!done){done=true;reject(Error('Server belum merespons. Periksa koneksi internet.'))}},timeout);google.script.run.withSuccessHandler(function(r){if(done)return;done=true;clearTimeout(t);if(!r||r.success===false){reject(Error((r&&(r.message||r.error))||'Terjadi kesalahan server.'));return}resolve(r)}).withFailureHandler(function(e){if(done)return;done=true;clearTimeout(t);reject(Error(e&&e.message||String(e)))}).api(TOKEN,action,p)})}
+var API_URL='https://script.google.com/macros/s/AKfycbxqUDDBejlCpirvLhPIOVA_Q7WbxppKVl59N8qItnUUw0l3cEcKF6GdoN4q9YVXtCxK/exec';
+function server(action,p,timeout){
+  p=p||{};timeout=timeout||20000;
+  return new Promise(function(resolve,reject){
+    var ctrl=new AbortController();
+    var t=setTimeout(function(){ctrl.abort()},timeout);
+    fetch(API_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:TOKEN,action:action,p:p}),signal:ctrl.signal})
+    .then(function(r){if(!r.ok)throw Error('Server error ('+r.status+').');return r.json()})
+    .then(function(r){clearTimeout(t);if(!r||r.success===false){reject(Error((r&&(r.message||r.error))||'Terjadi kesalahan server.'));return}resolve(r)})
+    .catch(function(e){clearTimeout(t);reject(Error(e&&e.name==='AbortError'?'Server belum merespons. Periksa koneksi internet.':(e&&e.message||'Gagal terhubung ke server.')))});
+  });
+}
 async function doLogin(ev){ev.preventDefault();var b=$('loginBtn');b.disabled=true;b.textContent='Memeriksa...';$('loginError').textContent='';try{var r=await server('login',{username:$('username').value.trim(),password:$('password').value});if(!r||!r.token||!r.user)throw Error('Login berhasil tetapi sesi tidak valid.');TOKEN=r.token;USER=r.user;localStorage.setItem('SILELET_TOKEN',TOKEN);localStorage.setItem('SILELET_USER',JSON.stringify(USER));showApp();go('dashboard');await loadData()}catch(e){console.error(e);$('loginError').textContent=e.message||'Login gagal.';$('app').classList.add('hidden');$('login').classList.remove('hidden')}finally{b.disabled=false;b.textContent='Masuk'}}
 async function check(){if(!TOKEN){$('login').classList.remove('hidden');$('app').classList.add('hidden');return}try{var cached=localStorage.getItem('SILELET_USER');if(cached)try{USER=JSON.parse(cached)}catch(x){USER=null}var r=await server('session');USER=r.user;showApp();go('dashboard');await loadData()}catch(e){console.warn('Session restore:',e.message);TOKEN='';USER=null;localStorage.removeItem('SILELET_TOKEN');localStorage.removeItem('SILELET_USER');$('login').classList.remove('hidden');$('app').classList.add('hidden')}}
 async function logout(){try{await server('logout')}catch(e){}localStorage.removeItem('SILELET_TOKEN');localStorage.removeItem('SILELET_USER');location.reload()}
@@ -934,40 +945,100 @@ function manualBlock(id){var s=student(id);form('Blokir Siswa','<form id="modalF
 function manualBlockPicker(){if(!canBlock())return;form('Blokir Manual','<form id="modalForm">'+studentPickerHtml('b',function(s){return !s.diblokir})+'<label>Alasan<textarea id="blockReason" rows="4" required></textarea></label><div class="actions"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn danger">Blokir</button></div></form>',async function(){try{if(!$('bStudentId').value)throw Error('Cari dan pilih siswa terlebih dahulu.');var r=await server('block',{siswa_id:$('bStudentId').value,alasan:$('blockReason').value});toast(r.message);closeModal();await loadData();go('blocked')}catch(e){toast(e.message)}});initStudentPicker('b',function(s){return !s.diblokir})}
 
 async function unblock(id){var a=prompt('Alasan membuka blokir:');if(a===null)return;try{var r=await server('unblock',{siswa_id:id,alasan:a});toast(r.message);await loadData()}catch(e){toast(e.message)}}
-async function saveManual(){if(!canAttend())return;var sid=$('attStudentId')&&$('attStudentId').value;if(!sid)return toast('Ketik nama/NIS/NISN lalu pilih siswa.');window.manualStudentId=sid;try{var p={siswa_id:sid,status:$('manualStatus').value,keterangan:'',tipe_absensi:attType,metode:'MANUAL'};if(attType==='EKSTRA')p.id_ekstra=$('extraSelect').value;if(attType==='BELAJAR'||attType==='SHOLAT')p.id_jenis_kegiatan=$('activitySelect').value;var r=await server('attendanceManual',p);toast(r.message);patchAttendance(r);renderAttendance();loadDash()}catch(e){toast(e.message)}}
+async function saveManual(){if(!canAttend())return;var sid=$('attStudentId')&&$('attStudentId').value;if(!sid)return toast('Ketik nama/NIS/NISN lalu pilih siswa.');window.manualStudentId=sid;try{var p={siswa_id:sid,status:$('manualStatus').value,keterangan:'',tipe_absensi:attType,metode:'MANUAL'};if(attType==='EKSTRA')p.id_ekstra=$('extraSelect').value;if(attType==='BELAJAR'||attType==='SHOLAT')p.id_jenis_kegiatan=$('activitySelect').value;var r=await server('attendanceManual',p);toast(r.message);beep(true);patchAttendance(r);renderAttendance();loadDash()}catch(e){beep(false);toast(e.message)}}
 function patchAttendance(r){if(!r||!r.siswa)return;/* Server remains source of truth; local refresh is deferred to avoid UI blocking. */}
+/* ================= SUARA ================= */
+var audioCtx=null;
+function unlockAudio(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume()}catch(e){}}
+function tone(f,st,dur,type,vol){var o=audioCtx.createOscillator(),g=audioCtx.createGain(),t0=audioCtx.currentTime+st;o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(vol||.25,t0);g.gain.exponentialRampToValueAtTime(.001,t0+dur);o.connect(g);g.connect(audioCtx.destination);o.start(t0);o.stop(t0+dur+.03)}
+function beep(ok){
+  unlockAudio();
+  try{
+    if(audioCtx){if(ok){tone(880,0,.12,'sine');tone(1320,.13,.2,'sine')}else{tone(220,0,.25,'sawtooth',.3);tone(160,.3,.4,'sawtooth',.3)}}
+    if(navigator.vibrate)navigator.vibrate(ok?80:[150,80,150]);
+    if(localStorage.getItem('SILELET_VOICE')!=='off'&&window.speechSynthesis){var u=new SpeechSynthesisUtterance(ok?'Berhasil':'Gagal');u.lang='id-ID';u.rate=1.1;speechSynthesis.cancel();speechSynthesis.speak(u)}
+  }catch(e){}
+}
+/* ================= SCANNER LIVE (langsung di halaman) ================= */
+var scanFacing='environment',lastScanCode='',lastScanAt=0,QR_LIB='https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
 async function scanCode(code){
   code=String(code||'').replace(/[\r\n\t]/g,'').trim();
-  if(code.length>256){
-    toast('QR/barcode berisi data terlalu besar. Gunakan QR siswa SILELET.');
-    return;
-  }
+  if(code.length>256){beep(false);toast('QR/barcode berisi data terlalu besar. Gunakan QR siswa SILELET.');return}
   if(!code||scanBusy)return;
-  if(!canAttend())return toast('Anda tidak memiliki izin absensi.');
+  if(!canAttend()){beep(false);return toast('Anda tidak memiliki izin absensi.')}
   scanBusy=true;
   $('scanResult').textContent='Memproses '+code+'...';
   try{
     var p={code:code,status:'HADIR',tipe_absensi:attType,metode:'BARCODE'};
     if(attType==='EKSTRA')p.id_ekstra=$('extraSelect').value;
     if(attType==='BELAJAR'||attType==='SHOLAT')p.id_jenis_kegiatan=$('activitySelect').value;
-    var r=await server('attendanceBarcode',p,15000);
-    var nama=r.siswa&&r.siswa.nama_siswa||'Siswa';
-    $('scanResult').innerHTML='<b>✓ Berhasil</b><br>'+esc(nama)+'<br><small>'+esc(r.message)+'</small>';
-    toast('✓ '+nama+' — absensi berhasil');
-    if(window._sileletScannerWindow&&!window._sileletScannerWindow.closed&&window._sileletScannerOrigin){
-      try{window._sileletScannerWindow.postMessage({type:'SILELET_SCAN_RESULT',nonce:scannerNonce,ok:true,name:nama,message:r.message},window._sileletScannerOrigin)}catch(e){}
-    }
+    if(currentClassId&&['SEKOLAH','BELAJAR','SHOLAT'].indexOf(attType)>=0)p.class_id=currentClassId;
+    var r=await server('attendanceBarcode',p,20000);
+    var nama=(r.siswa&&r.siswa.nama_siswa)||'Siswa';
+    $('scanResult').innerHTML='<b style="color:#16a34a">✓ Berhasil</b><br>'+esc(nama)+'<br><small>'+esc(r.message)+'</small>';
+    toast('✓ '+nama+' — absensi berhasil');beep(true);
     $('barcode').value='';
-    setTimeout(function(){renderAttendance();$('barcode').focus()},250);
+    setTimeout(renderAttendance,300);
   }catch(e){
-    var msg=e&&e.message||String(e);
-    $('scanResult').innerHTML='<b>Gagal</b><br>'+esc(msg);
-    toast(msg);
-    if(window._sileletScannerWindow&&!window._sileletScannerWindow.closed&&window._sileletScannerOrigin){
-      try{window._sileletScannerWindow.postMessage({type:'SILELET_SCAN_RESULT',nonce:scannerNonce,ok:false,message:msg},window._sileletScannerOrigin)}catch(x){}
-    }
-  }finally{setTimeout(function(){scanBusy=false},800)}
+    var msg=(e&&e.message)||String(e);
+    $('scanResult').innerHTML='<b style="color:#dc2626">✕ Gagal</b><br>'+esc(msg);
+    toast(msg);beep(false);
+  }finally{setTimeout(function(){scanBusy=false},1200)}
 }
+async function startScan(){
+  if(!canAttend())return toast('Anda tidak memiliki izin absensi.');
+  if(scannerStarting)return;
+  scannerStarting=true;unlockAudio();
+  try{
+    await loadScript(QR_LIB,'html5qr-lib');
+    await stopScan();
+    var box=$('reader');box.innerHTML='';
+    scanner=new Html5Qrcode('reader',{verbose:false});
+    var cfg={fps:10,aspectRatio:1,qrbox:function(w,h){var s=Math.floor(Math.min(w,h)*0.7);return{width:s,height:s}}};
+    var onOk=function(text){var n=Date.now();if(text===lastScanCode&&n-lastScanAt<4000)return;lastScanCode=text;lastScanAt=n;scanCode(text)};
+    try{await scanner.start({facingMode:scanFacing},cfg,onOk,function(){})}
+    catch(e1){
+      var cams=await Html5Qrcode.getCameras();
+      if(!cams||!cams.length)throw e1;
+      var re=scanFacing==='user'?/front|depan|user|facetime/i:/back|rear|belakang|environment/i;
+      var pick=cams.find(function(c){return re.test(c.label||'')})||(scanFacing==='user'?cams[0]:cams[cams.length-1]);
+      await scanner.start(pick.id,cfg,onOk,function(){});
+    }
+    box.classList.add('camera-live');
+    $('scanResult').textContent='Kamera '+(scanFacing==='user'?'depan':'belakang')+' aktif. Arahkan ke QR siswa.';
+  }catch(e){
+    var msg=(e&&e.message)||String(e);
+    if(/permission|denied|notallowed/i.test(msg))msg='Izin kamera ditolak. Izinkan kamera pada browser lalu coba lagi.';
+    $('reader').innerHTML='<div><b>📷 Kamera tidak dapat dibuka</b><small>'+esc(msg)+'</small></div>';
+    toast(msg);beep(false);
+  }finally{scannerStarting=false}
+}
+async function stopScan(){
+  scanBusy=false;
+  if(scanner){try{await scanner.stop()}catch(e){}try{scanner.clear()}catch(e){}scanner=null}
+  var r=$('reader');
+  if(r){r.classList.remove('camera-live');r.innerHTML='<div><b>Scanner berhenti</b><small>Tekan 📷 SCAN QR LIVE untuk kembali.</small></div>'}
+}
+async function switchCam(){
+  scanFacing=scanFacing==='environment'?'user':'environment';
+  if(scanner)await startScan();else toast('Kamera '+(scanFacing==='user'?'depan':'belakang')+' dipilih. Tekan SCAN QR LIVE.');
+}
+async function processPhoto(ev){
+  var f=ev.target.files&&ev.target.files[0];if(!f)return;
+  await stopScan();
+  $('scanResult').textContent='Membaca QR dari foto...';
+  try{
+    await loadScript(QR_LIB,'html5qr-lib');
+    var tmp=new Html5Qrcode('reader');var text=await tmp.scanFile(f,true);try{tmp.clear()}catch(e){}
+    $('reader').innerHTML='<div><b>✓ QR terbaca</b><small>Memproses absensi...</small></div>';
+    await scanCode(text);
+  }catch(e){
+    $('reader').innerHTML='<div><b>QR tidak terbaca</b><small>Pastikan QR utuh, fokus, dan cukup terang.</small></div>';
+    toast('QR pada foto tidak terbaca.');beep(false);
+    $('scanResult').textContent='QR tidak ditemukan pada gambar.';
+  }finally{try{$('cameraFile').value=''}catch(e){}}
+}
+
 async function loadScript(src,id){if($(id))return;return new Promise(function(resolve,reject){var s=document.createElement('script');s.id=id;s.src=src;s.async=true;s.onload=resolve;s.onerror=function(){reject(Error('Library scanner gagal dimuat.'))};document.head.appendChild(s)})}
 function scannerUrl(){
   var fromSettings=(D.settings||[]).find(function(x){return String(x.key||'')==='scanner_live_url';});
@@ -989,47 +1060,6 @@ function sendScannerClassList(){
   server('scannerClasses',{},10000).then(function(r){send(r.classes||[])}).catch(function(){send([])});
 }
 
-function startScan(){
-  if(!canAttend())return toast('Anda tidak memiliki izin absensi.');
-  if(scannerStarting)return;
-  scannerStarting=true;
-  try{
-    var base=scannerUrl();
-    if(!base)throw Error('URL Scanner LIVE belum diatur. Buka Pengaturan → URL Scanner LIVE, lalu masukkan URL HTTPS scanner.');
-    var u;
-    try{u=new URL(base,location.href)}catch(e){throw Error('URL Scanner LIVE tidak valid.');}
-    if(u.protocol!=='https:')throw Error('URL Scanner LIVE wajib HTTPS.');
-    scannerNonce=makeNonce();
-    u.searchParams.set('mode','qr2d');
-    u.searchParams.set('returnOrigin',location.origin);
-    u.searchParams.set('nonce',scannerNonce);
-    var w=window.open(u.toString(),'SILELET_LIVE_SCANNER','popup,width=480,height=860');
-    if(!w)w=window.open(u.toString(),'_blank');
-    if(!w)throw Error('Browser memblokir jendela scanner. Izinkan pop-up untuk SILELET.');
-    var origin=u.origin;
-    window._sileletScannerOrigin=origin;
-    window._sileletScannerWindow=w;
-    setTimeout(sendScannerClassList,300);
-    $('reader').innerHTML='<div class="camera-native-ready"><b>📷 Scanner LIVE aktif</b><small>Kamera dibuka di halaman scanner. Arahkan QR 2D ke kotak.</small></div>';
-    $('scanResult').textContent='Menunggu QR 2D...';
-  }catch(e){
-    $('reader').innerHTML='<div><b>📷 Scanner LIVE belum tersedia</b><small>'+esc(e&&e.message||String(e))+'</small><div class="camera-help">Pastikan URL scanner HTTPS sudah disimpan di Pengaturan.</div></div>';
-    toast(e&&e.message||String(e));
-  }finally{scannerStarting=false}
-}
-async function stopScan(){
-  scanBusy=false;
-  nativeScanActive=false;
-  if(nativeScanTimer){clearInterval(nativeScanTimer);nativeScanTimer=null}
-  barcodeDetector=null;
-  if(scanner){try{await scanner.stop()}catch(e){}try{await scanner.clear()}catch(e){}scanner=null}
-  if(cameraStream){try{cameraStream.getTracks().forEach(function(t){t.stop()})}catch(e){}cameraStream=null}
-  if(window._sileletScannerWindow&&!window._sileletScannerWindow.closed){try{window._sileletScannerWindow.postMessage({type:'SILELET_STOP_SCANNER',nonce:scannerNonce},window._sileletScannerOrigin||'*')}catch(e){}try{window._sileletScannerWindow.close()}catch(e){}}
-  window._sileletScannerWindow=null;scannerNonce='';window._sileletScannerOrigin='';
-  $('reader').classList.remove('camera-live');
-  $('reader').innerHTML='<div><b>Scanner berhenti</b><small>Tekan 📷 Scan QR LIVE untuk kembali.</small></div>';
-}
-
 function photoScan(){
   var input=$('cameraFile');
   if(!input)return toast('Kontrol foto tidak ditemukan.');
@@ -1038,24 +1068,6 @@ function photoScan(){
   input.value='';
   input.click();
 }
-async function processPhoto(ev){
-  var f=ev.target.files&&ev.target.files[0];
-  if(!f)return;
-  $('scanResult').textContent='Membaca QR 2D dari foto...';
-  try{
-    await loadScript('https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js','html5qr-lib');
-    var tmp=new Html5Qrcode('reader');
-    var text=await tmp.scanFile(f,true);
-    try{await tmp.clear()}catch(e){}
-    $('reader').innerHTML='<div><b>✓ QR 2D terbaca</b><small>Memproses absensi...</small></div>';
-    await scanCode(text);
-  }catch(e){
-    $('reader').innerHTML='<div><b>QR 2D tidak terbaca</b><small>Pastikan QR terlihat utuh, fokus, tidak terlalu kecil, dan pencahayaan cukup.</small></div>';
-    toast('QR 2D pada foto tidak terbaca.');
-    $('scanResult').textContent='QR 2D tidak ditemukan pada gambar.';
-  }finally{try{$('cameraFile').value=''}catch(e){}}
-}
-
 function barcodeView(id){
   var s=student(id),code=String(s.qr_token||s.nis||s.id_siswa||'').trim();
   form('QR 2D Siswa','<div class="qr2d-card" style="text-align:center;padding:8px 4px">'+
@@ -1383,7 +1395,7 @@ function initApp(){
   document.querySelectorAll('#nav .nav-parent').forEach(function(b){b.onclick=function(){var g=b.closest('.nav-group');var open=g.classList.contains('open');document.querySelectorAll('#nav .nav-group').forEach(function(x){x.classList.remove('open')});if(!open)g.classList.add('open')}});document.querySelectorAll('#nav button[data-page],#mobileNav button[data-page]').forEach(function(b){b.onclick=function(){go(b.dataset.page)}});$('mobileMenu').onclick=openSide;document.querySelectorAll('[data-go]').forEach(function(b){b.onclick=function(){go(b.dataset.go)}});
   $('searchStudent').oninput=renderStudents;$('studentClassFilter').onchange=renderStudents;$('studentGenderFilter').onchange=renderStudents;$('studentStatusFilter').onchange=renderStudents;$('importStudents').onclick=function(){$('studentExcelFile').click()};$('studentExcelFile').onchange=function(){importStudentsFromExcel(this.files&&this.files[0]);this.value=''};$('downloadStudentTemplate').onclick=downloadStudentTemplate;
   $('addJournal').onclick=addJournal;$('addAccount').onclick=accountAdd;$('accountRefresh').onclick=loadAccounts;$('accountSearch').oninput=function(){clearTimeout(window.__accountSearchTimer);window.__accountSearchTimer=setTimeout(loadAccounts,300)};$('manualAdd').onclick=manualAdd;$('manualRefresh').onclick=function(){pageCache={};loadManualRows()};$('manualTable').onchange=function(){manualSelectedTable=this.value;manualPage=1;manualSearch='';$('manualSearch').value='';loadManualRows()};$('manualSearch').oninput=function(){manualSearch=this.value;manualPage=1;clearTimeout(window.__manualSearchTimer);window.__manualSearchTimer=setTimeout(loadManualRows,300)};$('saveClassAttendance').onclick=saveClassAttendance;$('attendanceClass').onchange=function(){currentClassId=this.value;renderAttendance();};$('addStudent').onclick=function(){studentForm('')};['teacherSearch','teacherStatus','teacherSubject','classSearch','classGrade','classMajor','classStatus','activitySearch','activityCategory','activityStatus','vioFrom','vioTo','vioClass','vioSearch','vioType','blockClass','blockSearch','blockSource','parentSearch','parentClass','parentRelation','parentStatus','extraSearch','extraStatus','riskClass','riskSearch','riskLevel','riskPeriod','journalFrom','journalTo','journalTeacher','journalClassSearch','journalSubject'].forEach(function(id){if($(id))$(id).addEventListener('input',function(){if(id.indexOf('teacher')===0)renderTeachers();else if(id.indexOf('class')===0)renderClasses();else if(id.indexOf('activity')===0)renderActivities();else if(id.indexOf('vio')===0)renderViolations();else if(id.indexOf('block')===0)renderBlocked();else if(id.indexOf('parent')===0)renderParents();else if(id.indexOf('extra')===0)renderExtras();else if(id.indexOf('risk')===0)renderRisk();else renderJournal()})});fillAllClassFilters();$('addTeacher').onclick=function(){teacherForm('')};$('addClass').onclick=function(){classForm('')};$('addActivity').onclick=function(){activityForm('')};$('addParent').onclick=function(){parentForm('')};$('addExtra').onclick=function(){extraForm('')};$('addViolation').onclick=violationForm;$('addAnnouncement').onclick=function(){announcementForm('')};$('addLeave').onclick=function(){leaveForm('')};['leaveFrom','leaveTo','leaveClassFilter','leaveStatusFilter','leaveSearch'].forEach(function(id){if($(id))$(id).addEventListener('input',renderLeave)});['annSearch','annStatus','annTarget'].forEach(function(id){if($(id))$(id).addEventListener('input',renderAnnouncements)});$('rekapApply').onclick=applyRekap;$('rekapStudent').onkeydown=function(e){if(e.key==='Enter')applyRekap()};$('rekapActivity').onkeydown=function(e){if(e.key==='Enter')applyRekap()};$('rekapToday').onclick=function(){$('rekapFrom').value=today();$('rekapTo').value=today();applyRekap()};$('rekapReset').onclick=function(){$('rekapFrom').value='';$('rekapTo').value='';$('rekapClass').value='';$('rekapStudent').value='';$('rekapType').value='';$('rekapStatus').value='';$('rekapActivity').value='';applyRekap()};$('rekapCsv').onclick=exportRekapCsv;$('rekapRefresh').onclick=applyRekap;$('manualBlock').onclick=manualBlockPicker;$('refresh').onclick=loadData;$('searchStudent').oninput=renderStudents;
-  $('saveAttendance').onclick=saveManual;$('submitBarcode').onclick=function(){scanCode($('barcode').value)};$('barcode').onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();scanCode($('barcode').value)}};$('startScan').onclick=startScan;$('stopScan').onclick=stopScan;$('photoScan').onclick=photoScan;$('cameraFile').onchange=processPhoto;
+  $('saveAttendance').onclick=saveManual;$('submitBarcode').onclick=function(){scanCode($('barcode').value)};$('barcode').onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();scanCode($('barcode').value)}};$('startScan').onclick=startScan;$('stopScan').onclick=stopScan;$('switchCam').onclick=switchCam;$('photoScan').onclick=photoScan;$('cameraFile').onchange=processPhoto;
   document.querySelectorAll('[data-att]').forEach(function(b){b.onclick=function(){stopScan();attType=b.dataset.att;document.querySelectorAll('[data-att]').forEach(function(x){x.classList.toggle('active',x===b)});renderAttendance()}});
   $('calcRisk').onclick=calcRisk;$('editSchool').onclick=editSchool;$('editSettings').onclick=editSettings;$('changePassword').onclick=changePassword;$('theme').onclick=function(){document.body.classList.toggle('dark');localStorage.setItem('SILELET_THEME',document.body.classList.contains('dark')?'dark':'light')};
   if(localStorage.getItem('SILELET_THEME')==='dark')document.body.classList.add('dark');
